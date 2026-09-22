@@ -39,6 +39,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin', [OrderController::class, 'admin']);
     Route::post('/admin/siap/{id}', [OrderController::class, 'tandaiSiap']);
 
+    // Kasir & Konfirmasi Pembayaran Cash
+    Route::get('/admin/pembayaran', [OrderController::class, 'pembayaranIndex']);
+    Route::post('/admin/pembayaran/konfirmasi/{id}', [OrderController::class, 'konfirmasiPembayaran']);
+    Route::post('/admin/pembayaran/batal/{id}', [OrderController::class, 'batalPesanan']);
+    Route::get('/admin/api/pending-cash', [OrderController::class, 'apiPendingCash']);
+
     // Kelola Menu
     Route::get('/admin/menu', [MenuController::class, 'index']);
     Route::post('/admin/menu/tambah', [MenuController::class, 'store']);

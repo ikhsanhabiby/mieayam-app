@@ -83,6 +83,15 @@
                         <span class="material-icons-round text-base">soup_kitchen</span>
                         <span>Pesanan Dapur</span>
                     </a>
+
+                    <a 
+                        href="/admin/pembayaran" 
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 relative {{ request()->is('admin/pembayaran*') ? 'nav-active' : 'text-slate-600 hover:text-slate-900 hover:bg-white/80' }}"
+                    >
+                        <span class="material-icons-round text-base">payments</span>
+                        <span>Konfirmasi Kasir</span>
+                        <span id="navCashBadge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-black rounded-full bg-rose-500 text-white animate-pulse">0</span>
+                    </a>
                     
                     <a 
                         href="/admin/menu" 
@@ -151,6 +160,10 @@
         <a href="/admin" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap {{ request()->is('admin') ? 'nav-active' : 'bg-slate-100 text-slate-600' }}">
             Dapur
         </a>
+        <a href="/admin/pembayaran" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1 {{ request()->is('admin/pembayaran*') ? 'nav-active' : 'bg-slate-100 text-slate-600' }}">
+            <span>Kasir (Cash)</span>
+            <span id="navMobileCashBadge" class="hidden px-1.5 py-0.2 text-[9px] font-black rounded-full bg-rose-500 text-white">0</span>
+        </a>
         <a href="/admin/menu" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap {{ request()->is('admin/menu*') ? 'nav-active' : 'bg-slate-100 text-slate-600' }}">
             Menu
         </a>
@@ -201,6 +214,36 @@
     <footer class="bg-white border-t border-slate-200/80 py-4 text-center text-xs text-slate-400">
         <p>&copy; {{ date('Y') }} Mie Ayam Kita — Sistem Restoran Self-Service Modern</p>
     </footer>
+
+    <!-- REAL-TIME BADGE POLLING SCRIPT -->
+    <script>
+        function checkPendingCash() {
+            fetch('/admin/api/pending-cash')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('navCashBadge');
+                    const mBadge = document.getElementById('navMobileCashBadge');
+                    if (data.count > 0) {
+                        if (badge) {
+                            badge.innerText = data.count;
+                            badge.classList.remove('hidden');
+                        }
+                        if (mBadge) {
+                            mBadge.innerText = data.count;
+                            mBadge.classList.remove('hidden');
+                        }
+                    } else {
+                        if (badge) badge.classList.add('hidden');
+                        if (mBadge) mBadge.classList.add('hidden');
+                    }
+                })
+                .catch(() => {});
+        }
+
+        // Run immediately and every 7 seconds
+        checkPendingCash();
+        setInterval(checkPendingCash, 7000);
+    </script>
 
     @yield('scripts')
 </body>

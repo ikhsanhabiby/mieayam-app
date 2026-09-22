@@ -159,12 +159,41 @@
                     </p>
                 </div>
 
+                <!-- STATUS PEMBAYARAN CARD -->
+                @php
+                    $isPendingCash = ($order->metode_pembayaran === 'cash' && $order->status_pembayaran !== 'lunas');
+                @endphp
+                <div id="paymentStatusBox" class="mb-4 rounded-2xl p-4 border transition-all {{ $isPendingCash ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200' }}">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 {{ $isPendingCash ? 'bg-amber-500 text-slate-950' : 'bg-emerald-500 text-white' }}" id="paymentStatusIcon">
+                            <span class="material-icons-round text-lg">{{ $isPendingCash ? 'payments' : 'verified' }}</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-extrabold text-slate-900" id="paymentStatusTitle">
+                                    {{ $isPendingCash ? 'Menunggu Pembayaran Tunai di Kasir' : 'Pembayaran Lunas' }}
+                                </h4>
+                                <span class="text-xs font-black text-slate-900" id="paymentStatusAmount">
+                                    Rp {{ number_format($order->total_bayar ?? 0, 0, ',', '.') }}
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed" id="paymentStatusDesc">
+                                @if($isPendingCash)
+                                    Silakan menuju ke meja kasir dan bayar tunai dengan menyebutkan <strong>Meja {{ $order->nomor_meja }}</strong>.
+                                @else
+                                    Pembayaran Anda telah terverifikasi lunas.
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- RINCIAN PESANAN KARTU -->
                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/70 mt-2">
                     <div class="flex items-center justify-between border-b border-slate-200/70 pb-2.5 mb-2.5">
                         <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider">Item Dipesan</span>
                         <span class="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-md uppercase">
-                            {{ $order->metode_pembayaran ?? 'Belum Dibayar' }}
+                            {{ $order->metode_pembayaran ? strtoupper($order->metode_pembayaran) : 'CASH' }}
                         </span>
                     </div>
                     <p class="text-xs text-slate-700 font-semibold leading-relaxed">
@@ -213,7 +242,25 @@
             fetch('/cek-status/{{ $order->id }}')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === 'siap') {
+                    // Update Status Pembayaran Box jika sudah lunas
+                    if (data.status_pembayaran === 'lunas') {
+                        let box = document.getElementById('paymentStatusBox');
+                        let icon = document.getElementById('paymentStatusIcon');
+                        let title = document.getElementById('paymentStatusTitle');
+                        let desc = document.getElementById('paymentStatusDesc');
+
+                        if (box && !box.classList.contains('bg-emerald-50')) {
+                            box.className = 'mb-4 rounded-2xl p-4 border bg-emerald-50 border-emerald-200 transition-all';
+                            if (icon) {
+                                icon.className = 'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500 text-white';
+                                icon.innerHTML = '<span class="material-icons-round text-lg">verified</span>';
+                            }
+                            if (title) title.innerText = 'Pembayaran Lunas (Terkonfirmasi)';
+                            if (desc) desc.innerText = 'Pembayaran Anda telah diterima oleh kasir. Pesanan sedang disiapkan koki!';
+                        }
+                    }
+
+                    if (data.status === 'siap' || data.status_pesanan === 'siap') {
                         isDone = true;
                         clearInterval(intervalId);
 

@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('nomor_meja');
             $table->string('menu_pesanan');
+            $table->integer('total_bayar')->default(0);
             $table->string('metode_pembayaran')->nullable();
+            $table->string('status_pembayaran')->default('menunggu_konfirmasi');
             $table->string('status_pesanan')->default('dimasak');
             $table->timestamps();
         });

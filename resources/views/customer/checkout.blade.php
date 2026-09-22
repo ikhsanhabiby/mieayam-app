@@ -92,10 +92,16 @@
                     </span>
                 </div>
 
-                <div class="space-y-1 text-xs">
+                <div class="space-y-2 text-xs">
                     <p class="text-slate-300 text-xs font-medium leading-relaxed">
                         {{ $order->menu_pesanan }}
                     </p>
+                    <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-slate-400">Total yang Harus Dibayar:</span>
+                        <span class="text-base font-black text-brand-400">
+                            Rp {{ number_format($order->total_bayar ?? 0, 0, ',', '.') }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
